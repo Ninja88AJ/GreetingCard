@@ -1,0 +1,255 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+	<!--
+	-->
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="600" height="750"></canvas>
+    <script>
+		var canvas = document.querySelector("#myCanvas");
+		var context = canvas.getContext("2d");
+		var canvasWidth = canvas.width;
+		var canvasHeight = canvas.height;
+		
+		//message x and y positions
+		var messageXpos = 100;
+		var messageYpos = -50;
+		var instructionXpos = 42;
+		var instructionYpos = 900;
+		var instruction2Xpos = 40;
+		var instruction2Ypos = -50;
+		
+		//listen for click
+		var clickListen = document.getElementById('myCanvas');
+		clickListen.addEventListener('click', putCandles, true);
+		
+		//variables for detecting if and when user places candles correctly
+		var incorrectMessage = 0;
+		var correctCandle = 0;
+		
+		//image variables
+		const candleImg = new Image();
+		const cakeImg = new Image();
+		const candleCakeImg = new Image();
+		const blownOutImg = new Image();
+		candleImg.src = "candles.png";
+		cakeImg.src = "cakeNoCandles.png";
+		candleCakeImg.src = "correctCake.png";
+		blownOutImg.src = "blownOutCandles.png";
+		  
+		//write beginning birthday message
+		function writeBirthdayMessage() {
+			context.font = "32px Arial, sans-serif";
+			context.fillStyle = "blue";
+			context.fillText("I heard it was your birthday :)", messageXpos, messageYpos);
+		}
+		
+		//write birthday instructions
+		function writeBirthdayInstructions() {
+			context.font = "32px Arial, sans-serif";
+			context.fillStyle = "#990261";
+			context.fillText("(Click to put the candles on the cake)", instructionXpos, instructionYpos);
+		}
+		
+		//write ending birthday message
+		function writeEndMessage() {
+			context.font = "50px Arial, sans-serif";
+			context.fillStyle = "crimson";
+			context.fillText("Happy Birthday!!", 130, 100);
+		}
+		
+		//write next set of instructions to blow out candles
+		function writeNextInstruction() {
+			context.font = "32px Arial, sans-serif";
+			context.fillStyle = "#990261";
+			context.fillText("(Press Enter to blow out the candles)", 40, instruction2Ypos);
+		}
+		
+		//moves candles with the cursor
+		function moveCandle() {
+			context.drawImage(candleImg,mouseX - 265,mouseY - 150);
+		}
+		
+		//draws cake, blacked out candles
+		function drawCake() {
+			context.drawImage(cakeImg, -520, -510);
+		}
+		
+		//draws cake with candles (still lit)
+		function drawCorrectCake() {
+			context.drawImage(candleCakeImg, -520, -510);
+		}
+		
+		//draws blown out candles cake
+		function drawBlownOutCandles() {
+			context.drawImage(blownOutImg, -520, -510);
+		}
+		
+		//detects if the user clicks too high, too far right, etc.
+		function putCandles() {
+			if (correctCandle == 0) {
+				if (mouseX > 350) {
+					incorrectMessage = 1;
+				} else if (mouseX < 270) {
+					incorrectMessage = 2;
+				} else if (mouseY > 290) {
+					incorrectMessage = 3;
+				} else if (mouseY < 215) {
+					incorrectMessage = 4;
+				} else {
+					incorrectMessage = 5;
+				}
+			} else {
+			}
+		}
+		
+		//function to help the user find where to put the candles
+		function incorrectCandles() {
+			if (incorrectMessage == 1) {
+				//tells user to click further left
+				context.font = "20px Arial, sans-serif";
+				context.fillStyle = "red";
+				context.fillText("*Left*", 30, 275);
+			} else if (incorrectMessage == 2) {
+				//tells user to click further right
+				context.font = "20px Arial, sans-serif";
+				context.fillStyle = "red";
+				context.fillText("*Right*", 30, 275);
+			} else if (incorrectMessage == 3) {
+				//tells user to click further higher
+				context.font = "20px Arial, sans-serif";
+				context.fillStyle = "red";
+				context.fillText("*Higher*", 30, 275);
+			} else if (incorrectMessage == 4) {
+				//tells user to click further lower
+				context.font = "20px Arial, sans-serif";
+				context.fillStyle = "red";
+				context.fillText("*Lower*", 30, 275);
+			} else if (incorrectMessage == 5) {
+				//tells user they are correct
+				context.font = "20px Arial, sans-serif";
+				context.fillStyle = "green";
+				context.fillText("Nice Job!", 30, 275);
+				correctCandle = 1;
+			}
+		}
+		
+		document.addEventListener("keypress", function(endKey) {
+			//if enter key is pressed (after putting candles on), blow out candles
+			if (endKey.keyCode == 13) {
+				//make sure candles are on cake first
+				if (correctCandle == 1) {
+					//variable to detect when candles are blown out
+					correctCandle = 2;
+				}
+			}
+		});
+		
+		function callAll() {
+			context.clearRect(0, 0, canvasWidth, canvasHeight);
+			context.resetTransform();
+			//draw card background
+			context.beginPath();
+			context.rect(0,0, canvasWidth, canvasHeight);
+			context.closePath();
+			context.lineWidth = 1;
+			context.strokeStyle = "rgb(156,224,239)";
+			context.stroke();
+			context.fillStyle = "rgb(156,224,239)";
+			context.fill();
+			context.beginPath();
+			context.rect(0,0, 5, canvasHeight);
+			context.closePath();
+			context.lineWidth = 1;
+			context.strokeStyle = "navy";
+			context.stroke();
+			context.fillStyle = "navy";
+			context.fill();
+			
+			//initial greeting card = 0, completing instructions increments correctCandle by 1
+			if (correctCandle == 0) {
+				//animates the message to come from above
+				if (messageYpos < 90) {
+					messageYpos += 1;
+				}
+				writeBirthdayMessage();
+				
+				//animates the message to come from below
+				if (instructionYpos > 695) {
+				instructionYpos -= 1;
+				}
+				writeBirthdayInstructions();
+				
+				incorrectCandles();
+				drawCake();
+				moveCandle();
+			//after putting candles on the cake, next functions are called
+			} else if (correctCandle == 1) {
+				//animates the message to come from above as well
+				if (instruction2Ypos < 90) {
+					instruction2Ypos += 1;
+				}
+				writeNextInstruction();
+				drawCorrectCake();
+				incorrectCandles();
+			//final greeting card view after blowing out the candles
+			} else if (correctCandle == 2) {
+				drawBlownOutCandles();
+				writeEndMessage();
+			}
+			
+			requestAnimationFrame(callAll);
+		}
+		//calls the callAll() function (which calls all the necessary functions itself)
+		callAll();
+		
+		//helps detect mouse movement with getposition function
+		var canvasPos = getPosition(canvas);
+		var mouseX = 0;
+		var mouseY = 0;
+		canvas.addEventListener("mousemove",setMousePosition,false);
+		function setMousePosition(e) {
+			mouseX = e.clientX - canvasPos.x;
+			mouseY = e.clientY - canvasPos.y;
+		}
+
+		//getposition function
+		function getPosition(el) {
+		var xPos = 0;
+		var yPos = 0;
+		while (el) {
+			if (el.tagName == "BODY") {
+				var xScroll = el.scrollLeft || document.documentElement.scrollLeft;
+				var yScroll = el.scrollTop || document.documentElement.scrollTop;
+				
+				xPos += (el.offsetLeft - xScroll + el.clientLeft);
+				yPos += (el.offsetTop - yScroll + el.clientTop);
+			} else {
+				xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+				yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+			}
+			
+			el = el.offsetParent;
+		}
+			return {
+				x: xPos,
+				y: yPos
+			};
+		}
+		// save canvas image as data url (png format by default)
+		var dataURL = mainCanvas.toDataURL();
+
+		// set canvasImg image src to dataURL
+		// so it can be saved as an image
+		document.getElementById('canvasImg').src = dataURL;
+
+    </script>
+  </body>
+</html>
